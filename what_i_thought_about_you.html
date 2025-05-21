@@ -1,0 +1,88 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>What I Thought About You</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #121212;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 100px;
+        }
+        .hidden {
+            display: none;
+        }
+        input, button {
+            padding: 10px;
+            margin: 5px;
+            font-size: 16px;
+        }
+        .container {
+            max-width: 400px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>What I Thought About You</h2>
+        <div id="step1">
+            <p>Enter your full name:</p>
+            <input type="text" id="nameInput" placeholder="e.g., Hafsa Siddiqui">
+            <button onclick="checkName()">Next</button>
+        </div>
+
+        <div id="step2" class="hidden">
+            <p id="securityQuestion"></p>
+            <input type="text" id="answerInput" placeholder="Your answer here">
+            <button onclick="checkAnswer()">Submit</button>
+        </div>
+
+        <div id="result" class="hidden"></div>
+    </div>
+
+    <script>
+        const users = {
+            "hafsa siddiqui": {
+                question: "What was the first compliment I ever gave you?",
+                answer: "w face card",
+                message: "Hafsa, I never said it out loud but I really loved the way you understood silence. If you’re reading this, I meant everything I said."
+            },
+            "shayan malik": {
+                question: "Name the girl in your Karachi plan",
+                answer: "rimsha",
+                message: "Shayan, you were always a brother to me. I admired your loyalty and how you always had my back."
+            }
+        };
+
+        let currentUser = "";
+
+        function checkName() {
+            const name = document.getElementById("nameInput").value.toLowerCase().trim();
+            if (users[name]) {
+                currentUser = name;
+                document.getElementById("step1").classList.add("hidden");
+                document.getElementById("securityQuestion").textContent = users[name].question;
+                document.getElementById("step2").classList.remove("hidden");
+            } else {
+                alert("Name not recognized. Try again.");
+            }
+        }
+
+        function checkAnswer() {
+            const answer = document.getElementById("answerInput").value.toLowerCase().trim();
+            if (answer === users[currentUser].answer.toLowerCase()) {
+                document.getElementById("step2").classList.add("hidden");
+                document.getElementById("result").innerHTML = "<p>" + users[currentUser].message + "</p>";
+                document.getElementById("result").classList.remove("hidden");
+            } else {
+                alert("Incorrect answer. Try again.");
+            }
+        }
+    </script>
+</body>
+</html>
