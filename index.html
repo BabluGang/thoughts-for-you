@@ -1,84 +1,106 @@
-
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>What I Thought About You</title>
+    <title>Memory Capsule</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        body {
-            background-color: #0f172a;
-            color: white;
-            font-family: Arial, sans-serif;
-            text-align: center;
-            padding: 50px;
+        body { margin: 0; font-family: 'Orbitron', sans-serif; color: #00ffcc; overflow: hidden; }
+        video { position: fixed; top: 0; left: 0; min-width: 100%; min-height: 100%; z-index: -1; }
+        .container { position: relative; margin: 50px auto; max-width: 600px; padding: 20px; text-align: center; }
+        h2 { text-shadow: 0 0 10px #00ffcc, 0 0 20px #00ffcc; }
+        input, button { 
+            padding: 12px; 
+            margin: 10px; 
+            width: 80%; 
+            border: 2px solid #00ffcc; 
+            border-radius: 5px; 
+            background: rgba(0,0,0,0.5); 
+            color: #00ffcc; 
+            font-family: 'Orbitron', sans-serif; 
+            font-size: 16px; 
+            box-shadow: 0 0 15px #00ffcc; 
+            transition: all 0.3s; 
         }
-        input, button {
-            padding: 10px;
-            margin: 10px;
-            border-radius: 5px;
-            border: none;
-            font-size: 16px;
+        input:focus { outline: none; box-shadow: 0 0 25px #00ffcc; }
+        button { background: #00ffcc; color: #000; cursor: pointer; }
+        button:hover { background: #00b399; box-shadow: 0 0 20px #00b399; }
+        #message, #faceImage { display: none; margin-top: 20px; }
+        #faceImage img { 
+            width: 200px; 
+            height: 200px; 
+            border: 2px solid #00ffcc; 
+            border-radius: 10px; 
+            box-shadow: 0 0 20px #00ffcc; 
+            animation: scan 2s infinite; 
         }
-        button {
-            background-color: #2563eb;
-            color: white;
-            cursor: pointer;
+        @keyframes scan {
+            0% { box-shadow: 0 0 20px #00ffcc; }
+            50% { box-shadow: 0 0 40px #00ffcc; }
+            100% { box-shadow: 0 0 20px #00ffcc; }
         }
-        .hidden { display: none; }
+        @media (max-width: 600px) { .container { margin: 20px; } }
     </style>
 </head>
 <body>
-    <h1>💭 Memory Capsule 💭</h1>
-    <p>Enter your name to continue:</p>
-    <input type="text" id="nameInput" placeholder="Your name">
-    <button onclick="checkName()">Next</button>
-
-    <div id="questionBox" class="hidden">
-        <p id="questionText"></p>
-        <input type="text" id="answerInput" placeholder="Your answer">
-        <button onclick="checkAnswer()">Submit</button>
-    </div>
-
-    <div id="resultBox" class="hidden">
-        <p id="resultText"></p>
+    <video autoplay muted loop id="bgVideo">
+        <source src="futuristic-background.mp4" type="video/mp4">
+    </video>
+    <div class="container">
+        <h2 id="prompt">PLEASE IDENTIFY YOURSELF</h2>
+        <form id="nameForm">
+            <input type="text" id="name" placeholder="Enter your name" required><br>
+            <button type="submit">Next</button>
+        </form>
+        <form id="securityForm" style="display: none;">
+            <input type="text" id="security" placeholder="Favorite flower?" required><br>
+            <button type="submit">Submit</button>
+        </form>
+        <div id="faceImage">
+            <img src="hafsa-face.jpg" alt="User Image">
+        </div>
+        <div id="message">
+            <p>Hafsa, I’ve wanted to say this for a long time. I’m cutting you off because I feel we’ve grown apart, and I need to move forward. I wish you the best.</p>
+        </div>
     </div>
 
     <script>
-        const users = {
-            "shayan malik": {
-                question: "Name the girl in your karachi plan",
-                answer: "rimsha",
-                message: "Shayan, I always admired how real you kept things. No filters. No pretenses. I knew you'd get it."
-            },
-            "hafsa siddiqui": {
-                question: "what was the first compliment i ever gave u",
-                answer: "w face card",
-                message: "Hafsa, I meant every word I said about you. That face card? It never declines. And neither did my feelings."
-            }
-        };
+        let nameForm = document.getElementById("nameForm");
+        let securityForm = document.getElementById("securityForm");
+        let prompt = document.getElementById("prompt");
 
-        let currentUser = null;
-
-        function checkName() {
-            const inputName = document.getElementById("nameInput").value.trim().toLowerCase();
-            if (users[inputName]) {
-                currentUser = inputName;
-                document.getElementById("questionText").innerText = users[currentUser].question;
-                document.getElementById("questionBox").classList.remove("hidden");
+        nameForm.addEventListener("submit", function(event) {
+            event.preventDefault();
+            let name = document.getElementById("name").value.trim();
+            if (name === "Hafsa") {
+                nameForm.style.display = "none";
+                prompt.textContent = "SECURITY VERIFICATION";
+                securityForm.style.display = "block";
             } else {
-                alert("Name not found.");
+                alert("Access Denied.");
             }
-        }
+        });
 
-        function checkAnswer() {
-            const inputAnswer = document.getElementById("answerInput").value.trim().toLowerCase();
-            if (inputAnswer === users[currentUser].answer.toLowerCase()) {
-                document.getElementById("resultText").innerText = users[currentUser].message;
-                document.getElementById("resultBox").classList.remove("hidden");
+        securityForm.addEventListener("submit", function(event) {
+            event.preventDefault();
+            let security = document.getElementById("security").value.trim().toLowerCase();
+            if (security === "sunflower") {
+                securityForm.style.display = "none";
+                prompt.style.display = "none";
+                document.getElementById("faceImage").style.display = "block";
+                document.getElementById("message").style.display = "block";
             } else {
                 alert("Incorrect answer.");
             }
-        }
+        });
+
+        let inputs = document.querySelectorAll("input");
+        inputs.forEach(input => {
+            input.addEventListener("keydown", function() {
+                let audio = new Audio("typing-sound.mp3");
+                audio.play();
+            });
+        });
     </script>
 </body>
 </html>
