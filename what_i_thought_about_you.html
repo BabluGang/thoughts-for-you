@@ -1,88 +1,41 @@
-
 <!DOCTYPE html>
 <html>
 <head>
     <title>What I Thought About You</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #121212;
-            color: #fff;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            margin-top: 100px;
-        }
-        .hidden {
-            display: none;
-        }
-        input, button {
-            padding: 10px;
-            margin: 5px;
-            font-size: 16px;
-        }
-        .container {
-            max-width: 400px;
-            text-align: center;
-        }
+        body { font-family: Arial, sans-serif; text-align: center; background: #f0f0f0; }
+        .container { margin: 50px auto; max-width: 600px; padding: 20px; background: white; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        input, button { padding: 10px; margin: 10px; width: 80%; }
+        button { background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        #message { display: none; margin-top: 20px; padding: 15px; background: #e9ecef; border-radius: 5px; }
     </style>
 </head>
 <body>
     <div class="container">
         <h2>What I Thought About You</h2>
-        <div id="step1">
-            <p>Enter your full name:</p>
-            <input type="text" id="nameInput" placeholder="e.g., Hafsa Siddiqui">
-            <button onclick="checkName()">Next</button>
+        <form id="accessForm">
+            <input type="text" id="name" placeholder="Enter your full name" required><br>
+            <input type="text" id="security" placeholder="Favorite flower?" required><br>
+            <button type="submit">Submit</button>
+        </form>
+        <div id="message">
+            <p>Hafsa, I’ve wanted to say this for a long time. I’m cutting you off because I feel we’ve grown apart, and I need to move forward. I wish you the best.</p>
         </div>
-
-        <div id="step2" class="hidden">
-            <p id="securityQuestion"></p>
-            <input type="text" id="answerInput" placeholder="Your answer here">
-            <button onclick="checkAnswer()">Submit</button>
-        </div>
-
-        <div id="result" class="hidden"></div>
     </div>
 
     <script>
-        const users = {
-            "hafsa siddiqui": {
-                question: "What was the first compliment I ever gave you?",
-                answer: "w face card",
-                message: "Hafsa, I never said it out loud but I really loved the way you understood silence. If you’re reading this, I meant everything I said."
-            },
-            "shayan malik": {
-                question: "Name the girl in your Karachi plan",
-                answer: "rimsha",
-                message: "Shayan, you were always a brother to me. I admired your loyalty and how you always had my back."
-            }
-        };
-
-        let currentUser = "";
-
-        function checkName() {
-            const name = document.getElementById("nameInput").value.toLowerCase().trim();
-            if (users[name]) {
-                currentUser = name;
-                document.getElementById("step1").classList.add("hidden");
-                document.getElementById("securityQuestion").textContent = users[name].question;
-                document.getElementById("step2").classList.remove("hidden");
+        document.getElementById("accessForm").addEventListener("submit", function(event) {
+            event.preventDefault();
+            let name = document.getElementById("name").value.trim();
+            let security = document.getElementById("security").value.trim().toLowerCase();
+            if (name === "Hafsa" && security === "sunflower") {
+                document.getElementById("message").style.display = "block";
+                document.getElementById("accessForm").style.display = "none";
             } else {
-                alert("Name not recognized. Try again.");
+                alert("Incorrect name or answer.");
             }
-        }
-
-        function checkAnswer() {
-            const answer = document.getElementById("answerInput").value.toLowerCase().trim();
-            if (answer === users[currentUser].answer.toLowerCase()) {
-                document.getElementById("step2").classList.add("hidden");
-                document.getElementById("result").innerHTML = "<p>" + users[currentUser].message + "</p>";
-                document.getElementById("result").classList.remove("hidden");
-            } else {
-                alert("Incorrect answer. Try again.");
-            }
-        }
+        });
     </script>
 </body>
 </html>
