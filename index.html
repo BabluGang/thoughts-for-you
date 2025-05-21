@@ -132,12 +132,12 @@
     <div class="start-screen" id="startScreen">
         <button class="start-button" id="startButton">Initiate Sequence</button>
     </div>
-    <video id="bgVideo">
-        <source src="futuristic-background.mp4" type="video/mp4">
-    </video>
-    <audio id="bgMusic" loop>
-        <source src="background-music.mp3" type="audio/mp3">
-    </audio>
+<video id="bgVideo">
+    <source src="/BablugGang/futuristic-background.mp4" type="video/mp4">
+</video>
+<audio id="bgMusic" loop>
+    <source src="/BablugGang/background-music.mp3" type="audio/mp3">
+</audio>
     <div id="particles"></div>
     <div class="container">
         <h2 id="prompt">PLEASE IDENTIFY YOURSELF</h2>
@@ -285,33 +285,55 @@
             requestAnimationFrame(step);
         }
 
-        // Create star animation on successful login with tilt interaction
-        function createStars(count = 20) {
-            particlesDiv.innerHTML = '';
-            particlesDiv.style.display = 'block';
-            isParticlesActive = true;
-            for (let i = 0; i < count; i++) {
-                const star = document.createElement('div');
-                star.className = 'star';
-                star.style.left = Math.random() * 100 + 'vw';
-                star.style.top = Math.random() * 100 + 'vh';
-                star.style.animationDelay = Math.random() * 1 + 's';
-                particlesDiv.appendChild(star);
-            }
-            updateStars();
-        }
+// Create star animation on successful login with tilt interaction
+function createStars(count = 20) {
+    particlesDiv.innerHTML = '';
+    particlesDiv.style.display = 'block';
+    isParticlesActive = true;
+    for (let i = 0; i < count; i++) {
+        const star = document.createElement('div');
+        star.className = 'star';
+        star.style.left = Math.random() * 100 + 'vw';
+        star.style.top = Math.random() * 100 + 'vh';
+        star.style.animationDelay = Math.random() * 1 + 's';
+        particlesDiv.appendChild(star);
+    }
+    // Request permission for device orientation on mobile (iOS 13+)
+    if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+        DeviceOrientationEvent.requestPermission()
+            .then(permissionState => {
+                if (permissionState === 'granted') {
+                    startTiltListener();
+                } else {
+                    console.log("Device orientation permission denied");
+                }
+            })
+            .catch(error => console.error("Error requesting device orientation permission:", error));
+    } else {
+        startTiltListener(); // For devices that don't require permission
+    }
+    updateStars();
+}
 
-        let tiltX = 0, tiltY = 0;
-        function updateStars() {
-            if (!isParticlesActive) return;
-            const stars = document.querySelectorAll('.star');
-            stars.forEach(star => {
-                const baseX = parseFloat(star.style.left) || 0;
-                const baseY = parseFloat(star.style.top) || 0;
-                star.style.transform = `translate(${tiltX * 2}px, ${tiltY * 2}px)`;
-            });
-            requestAnimationFrame(updateStars);
+let tiltX = 0, tiltY = 0;
+function startTiltListener() {
+    window.addEventListener('deviceorientation', (event) => {
+        if (isParticlesActive) {
+            tiltX = event.gamma / 90; // Normalize to -1 to 1 based on phone tilt
+            tiltY = event.beta / 90;  // Normalize to -1 to 1 based on phone tilt
+            console.log("Tilt X:", tiltX, "Tilt Y:", tiltY); // Debug tilt values
         }
+    }, true);
+}
+
+function updateStars() {
+    if (!isParticlesActive) return;
+    const stars = document.querySelectorAll('.star');
+    stars.forEach(star => {
+        star.style.transform = `translate(${tiltX * 20}px, ${tiltY * 20}px)`; // Increased movement range
+    });
+    requestAnimationFrame(updateStars);
+}
 
         // Handle device orientation for tilt
         window.addEventListener('deviceorientation', (event) => {
@@ -377,6 +399,9 @@ securityForm.addEventListener("submit", function(event) {
     event.preventDefault();
     let name = document.getElementById("name").value.trim().toLowerCase();
     let security = document.getElementById("security").value.trim().toLowerCase();
+    let menuAudio = new Audio("/BablugGang/menu-sound.mp3");
+    let accessAudio = new Audio("/BablugGang/access-granted.mp3");
+    let denyAudio = new Audio("/BablugGang/access-denied.mp3");
     attemptCount++;
     if (users[name] && security === users[name].securityAnswer) {
         let menuAudio = new Audio("menu-sound.mp3");
