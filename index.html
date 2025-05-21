@@ -1,0 +1,84 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>What I Thought About You</title>
+    <style>
+        body {
+            background-color: #0f172a;
+            color: white;
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 50px;
+        }
+        input, button {
+            padding: 10px;
+            margin: 10px;
+            border-radius: 5px;
+            border: none;
+            font-size: 16px;
+        }
+        button {
+            background-color: #2563eb;
+            color: white;
+            cursor: pointer;
+        }
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+    <h1>💭 Memory Capsule 💭</h1>
+    <p>Enter your name to continue:</p>
+    <input type="text" id="nameInput" placeholder="Your name">
+    <button onclick="checkName()">Next</button>
+
+    <div id="questionBox" class="hidden">
+        <p id="questionText"></p>
+        <input type="text" id="answerInput" placeholder="Your answer">
+        <button onclick="checkAnswer()">Submit</button>
+    </div>
+
+    <div id="resultBox" class="hidden">
+        <p id="resultText"></p>
+    </div>
+
+    <script>
+        const users = {
+            "shayan malik": {
+                question: "Name the girl in your karachi plan",
+                answer: "rimsha",
+                message: "Shayan, I always admired how real you kept things. No filters. No pretenses. I knew you'd get it."
+            },
+            "hafsa siddiqui": {
+                question: "what was the first compliment i ever gave u",
+                answer: "w face card",
+                message: "Hafsa, I meant every word I said about you. That face card? It never declines. And neither did my feelings."
+            }
+        };
+
+        let currentUser = null;
+
+        function checkName() {
+            const inputName = document.getElementById("nameInput").value.trim().toLowerCase();
+            if (users[inputName]) {
+                currentUser = inputName;
+                document.getElementById("questionText").innerText = users[currentUser].question;
+                document.getElementById("questionBox").classList.remove("hidden");
+            } else {
+                alert("Name not found.");
+            }
+        }
+
+        function checkAnswer() {
+            const inputAnswer = document.getElementById("answerInput").value.trim().toLowerCase();
+            if (inputAnswer === users[currentUser].answer.toLowerCase()) {
+                document.getElementById("resultText").innerText = users[currentUser].message;
+                document.getElementById("resultBox").classList.remove("hidden");
+            } else {
+                alert("Incorrect answer.");
+            }
+        }
+    </script>
+</body>
+</html>
