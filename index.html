@@ -140,10 +140,11 @@
         <button class="start-button" id="startButton">Initiate Sequence</button>
     </div>
     <video id="bgVideo" muted>
-        <source src="/BablugGang/futuristic-background.mp4" type="video/mp4">
+        <source src="./BablugGang/futuristic-background.mp4">
+
     </video>
     <audio id="bgMusic" loop>
-        <source src="/BablugGang/background-music.mp3" type="audio/mp3">
+        <source src="./BablugGang/background-music.mp3" type="audio/mp3">
     </audio>
     <div id="particles"></div>
     <div class="container">
@@ -159,7 +160,7 @@
             <button type="submit">Submit</button>
         </form>
         <div id="faceImage">
-            <img src="hafsa-face.jpg" alt="User Image">
+            <img src="./hafsa-face.jpg" alt="User Image">
         </div>
         <div id="message">
             <p id="messageText">Hafsa, I’ve wanted to say this for a long time. I’m cutting you off because I feel we’ve grown apart, and I need to move forward. I wish you the best.</p>
@@ -168,8 +169,9 @@
     </div>
 
     <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
 
     <script>
         // Ensure script runs after DOM is loaded
@@ -210,28 +212,28 @@
                     securityQuestion: "What was the first compliment I ever gave you?",
                     securityAnswer: "w face card",
                     message: "hi hoe r u.",
-                    image: "hafsa-face.jpg",
+                    image: "./hafsa-face.jpg",
                     hint: "Hint: Think about a compliment"
                 },
                 "shayan malik": {
                     securityQuestion: "Name of girl for your karachi trip?",
                     securityAnswer: "rimsha",
                     message: "Nigga shut yo bitch ass up",
-                    image: "shayan-face.jpg",
+                    image: "./shayan-face.jpg",
                     hint: "Hint: Think about our first pet"
                 },
                 "fasih abbasi": {
                     securityQuestion: "what is ur free fire gamer tag?",
                     securityAnswer: "King Abbasi 6",
                     message: "King shit man",
-                    image: "fasih-face.jpg",
+                    image: "./fasih-face.jpg",
                     hint: "Hint: Think about your Free Fire name"
                 },
                 "azhaff khalid": {
                     securityQuestion: "Whats the name of the thc D u gave me?",
                     securityAnswer: "Raastorm",
                     message: "prostitute fucker u r",
-                    image: "azhaff-face.jpg",
+                    image: "./azhaff-face.jpg",
                     hint: "Hint: Think about the THC name"
                 }
             };
@@ -429,7 +431,7 @@
                 event.preventDefault();
                 let name = document.getElementById("name").value.trim().toLowerCase();
                 if (users[name]) {
-                    let menuAudio = new Audio("/BablugGang/menu-sound.mp3");
+                    let menuAudio = new Audio("./BablugGang/menu-sound.mp3");
                     menuAudio.play();
                     nameForm.style.display = "none";
                     prompt.textContent = "SECURITY VERIFICATION";
@@ -451,9 +453,9 @@
                 let security = document.getElementById("security").value.trim().toLowerCase();
                 attemptCount++;
                 if (users[name] && security === users[name].securityAnswer) {
-                    let menuAudio = new Audio("/BablugGang/menu-sound.mp3");
+                    let menuAudio = new Audio("./BablugGang/menu-sound.mp3");
                     menuAudio.play();
-                    let accessAudio = new Audio("/BablugGang/access-granted.mp3");
+                    let accessAudio = new Audio("./BablugGang/access-granted.mp3");
                     accessAudio.play();
                     securityForm.style.display = "none";
                     prompt.style.display = "none";
@@ -479,7 +481,7 @@
             });
 
             function goBack() {
-                let menuAudio = new Audio("/BablugGang/menu-sound.mp3");
+                let menuAudio = new Audio("./BablugGang/menu-sound.mp3");
                 menuAudio.play();
                 document.getElementById("faceImage").style.display = "none";
                 document.getElementById("message").style.display = "none";
